@@ -80,9 +80,10 @@ WSGI_APPLICATION = 'dicussion_board.wsgi.application'
 # استخدم DATABASE_URL من البيئة أو PostgreSQL المحلي
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgres://postgres:PASSWORD@localhost:5432/Boards_django',
+        default=os.environ.get('DATABASE_URL'),  # يقرأ من Environment Variable
         conn_max_age=600
     )
+
 }
 
 # Password validation
