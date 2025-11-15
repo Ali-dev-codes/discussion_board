@@ -1,0 +1,171 @@
+
+{% extends 'base.html' %}
+{% load static %}
+{% block stylesheet %}
+  <link rel="stylesheet" href="{% static 'css/account.css' %}">
+{% endblock %}
+
+
+
+
+
+{%  block body %}
+
+
+<style>
+    .container {
+        max-width: 500px;
+        margin: 40px auto;
+        padding: 30px;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .container:hover {
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        transform: translateY(-5px);
+    }
+
+    h1 {
+        color: #3a0ca3;
+        text-align: center;
+        margin-bottom: 30px;
+        font-weight: 700;
+        font-size: 32px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    form {
+        margin-top: 20px;
+    }
+
+    /* تنسيق الحقول */
+    .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 14px 16px;
+        margin-bottom: 20px;
+        transition: all 0.3s;
+        font-size: 16px;
+        width: 100%;
+    }
+
+    .form-control:focus {
+        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+        outline: none;
+    }
+
+    /* تنسيق التسميات */
+    .form-group label {
+        color: #495057;
+        font-weight: 500;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    /* تنسيق الزر */
+    .btn-primary {
+        background: linear-gradient(to right, #4361ee, #3a0ca3);
+        border: none;
+        border-radius: 8px;
+        padding: 14px 20px;
+        font-weight: 600;
+        font-size: 18px;
+        width: 100%;
+        margin-top: 15px;
+        transition: all 0.3s;
+        color: white;
+        cursor: pointer;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(to right, #3a0ca3, #4361ee);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(58, 12, 163, 0.3);
+    }
+
+    /* تنسيق الأخطاء */
+    .errorlist {
+        color: #e63946;
+        list-style: none;
+        padding: 0;
+        margin-top: 5px;
+        font-size: 14px;
+        background: rgba(230, 57, 70, 0.1);
+        padding: 10px;
+        border-radius: 6px;
+        border-left: 4px solid #e63946;
+    }
+
+    /* تأثيرات للرسائل */
+    .alert {
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .alert-success {
+        background-color: #d1e7dd;
+        color: #0f5132;
+        border-left: 4px solid #0f5132;
+    }
+
+    .alert-error {
+        background-color: #f8d7da;
+        color: #842029;
+        border-left: 4px solid #842029;
+    }
+
+    /* تصميم متجاوب */
+    @media (max-width: 576px) {
+        .container {
+            padding: 20px;
+            margin: 20px 15px;
+        }
+
+        h1 {
+            font-size: 28px;
+        }
+
+        .btn-primary {
+            padding: 12px 16px;
+            font-size: 16px;
+        }
+    }
+</style>
+
+
+ <div class="container">
+    <h1 class="text-center logo my-4">
+      <a href="{% url 'home' %}">Django Boards</a>
+    </h1>
+    <div class="row justify-content-center">
+      <div class="col-lg-8 col-md-10 col-sm-12">
+        <div class="card">
+          <div class="card-body">
+            <h3 class="card-title">Sign up</h3>
+            <form method="post" novalidate>
+              {% csrf_token %}
+              {% include 'includes/form.html' %}
+              <button type="submit" class="btn btn-primary btn-block">Create an account</button>
+            </form>
+          </div>
+          <div class="card-footer text-muted text-center">
+            Already have an account? <a href="{%url 'login'%}">Log in</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+{% endblock %}
+
+
+
+
+

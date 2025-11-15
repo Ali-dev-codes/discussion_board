@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %} Boards {% endblock %}
+
+
+
+{% block breadcrumb%}
+    <style>
+        /* خطوط أفقية فقط */
+        .table tbody tr td {
+            border-top: 1px solid rgba(0,0,0,0.2); /* خط أفقي خفيف */
+        }
+        /* نشيل الخطوط العمودية */
+        .table th, .table td {
+            border-left: none !important;
+            border-right: none !important;
+        }
+        /* نخفي آخر خط */
+        .table tbody tr:last-child td {
+            border-bottom: none !important;
+        }
+        /* خلفية breadcrumb */
+        .breadcrumb {
+            background-color: #b0b0b0; /* رمادي فاتح */
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+
+            <li class="breadcrumb-item active" aria-current="page">Boards</li>
+    {% endblock %}
+
+
+
+
+{% block content%}
+    <table class="table table-sm table-borderless">
+        <thead class="table-dark">
+        <tr>
+            <th>Board</th>
+            <th>Posts</th>
+            <th>Topic</th>
+            <th>Last Post</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for board in boards %}
+        <tr>
+            <td><a href="{% url 'board_topics' board.pk%}">{{ board.name }}</a><br>
+                <small class="text-muted">{{ board.description }}</small>
+            </td>
+            <td>{{board.get_posts_count}}</td>
+            <td>{{board.topics.count}}</td>
+            <td>
+                {% with post=board.get_last_post%}
+                    {%if post%}
+                        by {{post.created_by.username}} at {{post.created_dt}}
+                    {%else%}
+                        <small>No Posts</small>
+                    {%endif%}
+
+                {%endwith%}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -1,0 +1,335 @@
+{% extends 'base.html' %}
+{% block title %} {{ board.name }} - Topics {% endblock %}
+
+{% block breadcrumb %}
+    <style>
+        .breadcrumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: none;
+        }
+        .breadcrumb-item a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .breadcrumb-item a:hover {
+            color: #e0e0e0;
+            transform: translateY(-1px);
+        }
+        .breadcrumb-item.active {
+            color: #f8f9fa;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        .breadcrumb-item + .breadcrumb-item::before {
+            color: rgba(255,255,255,0.7);
+            content: "›";
+            font-size: 1.2em;
+        }
+    </style>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}"><i class="fas fa-home me-2"></i>Boards</a></li>
+            <li class="breadcrumb-item active"><i class="fas fa-folder me-2"></i>{{ board.name }}</li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="page-header">
+        <h2 class="mb-1 text-gradient">{{ board.name }} Topics</h2>
+        <p class="text-muted mb-0">Explore discussions and join the conversation</p>
+    </div>
+    <a href="{% url 'new_topic' board.pk %}" class="btn btn-primary btn-glow">
+        <i class="fas fa-plus me-2"></i> New Topic
+    </a>
+</div>
+
+{% if board.topics.all %}
+<div class="card shadow-lg border-0">
+    <div class="card-header bg-dark text-white py-3">
+        <div class="row align-items-center">
+            <div class="col-md-4">
+                <h5 class="mb-0"><i class="fas fa-list me-2"></i>Topics</h5>
+            </div>
+            <div class="col-md-8 text-end">
+                <small class="text-light">Total: {{ topics.paginator.count }} topics</small>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-4"><i class="fas fa-comment me-2"></i>Topic</th>
+                        <th><i class="fas fa-user me-2"></i>Created by</th>
+                        <th class="text-center"><i class="fas fa-comments me-2"></i>Posts</th>
+                        <th class="text-center"><i class="fas fa-eye me-2"></i>Views</th>
+                        <th class="text-center"><i class="fas fa-clock me-2"></i>Created Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for topic in topics %}
+                    <tr class="topic-row">
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <div class="topic-icon me-3">
+                                    <i class="fas fa-file-alt text-primary"></i>
+                                </div>
+                                <div>
+                                    <strong>
+                                        <a href="{% url 'topic_posts' board.pk topic.pk %}" class="topic-link text-decoration-none">
+                                            {{ topic.subject }}
+                                        </a>
+                                    </strong>
+                                    {% if topic.comments > 10 %}
+                                    <span class="badge bg-warning ms-2">Hot</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="user-avatar me-2">
+                                    <i class="fas fa-user-circle text-secondary"></i>
+                                </div>
+                                <span class="username">{{ topic.created_by.username }}</span>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-primary rounded-pill posts-count">{{ topic.comments }}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-info rounded-pill views-count">{{ topic.views }}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="date-badge">{{ topic.created_dt|date:"M d, Y H:i" }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="text-center py-5 empty-state-card">
+    <div class="empty-state">
+        <div class="empty-icon mb-4">
+            <i class="fas fa-comments fa-4x text-gradient"></i>
+        </div>
+        <h4 class="text-muted mb-3">No Topics Yet</h4>
+        <p class="text-muted mb-4">Be the first to start a discussion in this board!</p>
+        <a href="{% url 'new_topic' board.pk %}" class="btn btn-primary btn-lg">
+            <i class="fas fa-plus me-2"></i>Create First Topic
+        </a>
+    </div>
+</div>
+{% endif %}
+
+{% if topics.paginator.num_pages > 1 %}
+<nav aria-label="Topics pagination" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if topics.has_previous %}
+        <li class="page-item">
+            <a class="page-link pagination-btn" href="?page={{ topics.previous_page_number }}">
+                <i class="fas fa-chevron-left me-2"></i>Previous
+            </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link pagination-btn">
+                <i class="fas fa-chevron-left me-2"></i>Previous
+            </span>
+        </li>
+        {% endif %}
+
+        {% for page_num in topics.paginator.page_range %}
+            {% if topics.number == page_num %}
+            <li class="page-item active">
+                <span class="page-link pagination-btn current-page">
+                    {{ page_num }}
+                </span>
+            </li>
+            {% else %}
+            <li class="page-item">
+                <a class="page-link pagination-btn" href="?page={{ page_num }}">
+                    {{ page_num }}
+                </a>
+            </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if topics.has_next %}
+        <li class="page-item">
+            <a class="page-link pagination-btn" href="?page={{ topics.next_page_number }}">
+                Next<i class="fas fa-chevron-right ms-2"></i>
+            </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link pagination-btn">
+                Next<i class="fas fa-chevron-right ms-2"></i>
+            </span>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+<style>
+    .text-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .btn-glow {
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    }
+
+    .btn-glow:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+    }
+
+    .card {
+        border-radius: 15px;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+    .table th {
+        border: none;
+        font-weight: 600;
+        background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+        color: white;
+        padding: 1rem 0.75rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .table td {
+        vertical-align: middle;
+        padding: 1.25rem 0.75rem;
+        border-bottom: 1px solid #f1f3f4;
+    }
+
+    .topic-row {
+        transition: all 0.3s ease;
+    }
+
+    .topic-row:hover {
+        background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+        transform: translateX(5px);
+    }
+
+    .topic-link {
+        color: #2c3e50;
+        transition: all 0.3s ease;
+    }
+
+    .topic-link:hover {
+        color: #667eea;
+        text-decoration: underline !important;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.5em 0.8em;
+        font-weight: 500;
+    }
+
+    .empty-state-card {
+        background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+        border-radius: 20px;
+        margin: 2rem 0;
+    }
+
+    .empty-icon {
+        opacity: 0.7;
+    }
+
+    .pagination-btn {
+        border-radius: 8px;
+        margin: 0 3px;
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .pagination-btn:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-color: #667eea;
+        transform: translateY(-1px);
+    }
+
+    .page-item.active .pagination-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: #667eea;
+        color: white;
+    }
+
+    .page-item.disabled .pagination-btn {
+        background-color: #f8f9fa;
+        color: #6c757d;
+        border-color: #dee2e6;
+    }
+
+    .topic-icon, .user-avatar {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: rgba(102, 126, 234, 0.1);
+    }
+
+    .username {
+        font-weight: 500;
+        color: #495057;
+    }
+
+    .date-badge {
+        background: #f8f9fa;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+        .table-responsive {
+            border-radius: 10px;
+        }
+
+        .page-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .btn-primary {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+{% endblock %}

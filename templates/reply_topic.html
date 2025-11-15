@@ -1,0 +1,307 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+Post Reply - {{ topic.subject }}
+{% endblock %}
+{% block breadcrumb %}
+<style>
+    .breadcrumb {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 15px 20px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border: none;
+    }
+    .breadcrumb-item a {
+        color: #ffffff;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .breadcrumb-item a:hover {
+        color: #e0e0e0;
+        transform: translateY(-1px);
+    }
+    .breadcrumb-item.active {
+        color: #f8f9fa;
+        font-weight: 600;
+        font-size: 1.1em;
+    }
+    .breadcrumb-item + .breadcrumb-item::before {
+        color: rgba(255,255,255,0.7);
+        content: "›";
+        font-size: 1.2em;
+    }
+</style>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}"><i class="fas fa-home me-2"></i>Boards</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'board_topics' topic.board.pk %}"><i class="fas fa-folder me-2"></i>{{ topic.board.name }}</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'topic_posts' topic.board.pk topic.pk %}"><i class="fas fa-comment me-2"></i>{{ topic.subject }}</a></li>
+        <li class="breadcrumb-item active"><i class="fas fa-reply me-2"></i>Post Reply</li>
+    </ol>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow-lg border-0 mb-4">
+            <div class="card-header bg-dark text-white py-3">
+                <h4 class="mb-0"><i class="fas fa-reply me-2"></i>Post a Reply</h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" class="reply-form">
+                    {% csrf_token %}
+                    {% include 'includes/form.html' %}
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <a href="{% url 'topic_posts' topic.board.pk topic.pk %}" class="btn btn-outline-secondary btn-back">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Topic
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-glow btn-lg">
+                            <i class="fas fa-paper-plane me-2"></i>Post Reply
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-primary text-white py-3">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Topic Info</h5>
+            </div>
+            <div class="card-body">
+                <div class="topic-info">
+                    <div class="info-item mb-3">
+                        <strong><i class="fas fa-comment me-2 text-primary"></i>Topic:</strong>
+                        <p class="mb-0 text-muted">{{ topic.subject }}</p>
+                    </div>
+                    <div class="info-item mb-3">
+                        <strong><i class="fas fa-user me-2 text-primary"></i>Started by:</strong>
+                        <p class="mb-0 text-muted">{{ topic.created_by.username }}</p>
+                    </div>
+                    <div class="info-item mb-3">
+                        <strong><i class="fas fa-comments me-2 text-primary"></i>Replies:</strong>
+                        <p class="mb-0 text-muted">{{ topic.posts.count|add:"-1" }}</p>
+                    </div>
+                    <div class="info-item">
+                        <strong><i class="fas fa-eye me-2 text-primary"></i>Views:</strong>
+                        <p class="mb-0 text-muted">{{ topic.views }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-lg border-0 mt-4">
+    <div class="card-header bg-dark text-white py-3">
+        <h5 class="mb-0"><i class="fas fa-history me-2"></i>Previous Posts ({{ topic.posts.count }})</h5>
+    </div>
+    <div class="card-body">
+        {% for post in topic.posts.all %}
+        <div class="card post-container shadow-sm border-0 mb-4">
+            <div class="card-body p-4">
+                <div class="row">
+                    <div class="col-md-2 text-center mb-3 mb-md-0">
+                        <div class="user-avatar-section">
+                            <img src="{% static 'img/test_user.png' %}" alt="{{ post.created_by.username }}" class="img-fluid rounded-circle user-avatar shadow">
+                            <div class="mt-2">
+                                <strong class="text-primary d-block">{{ post.created_by.username }}</strong>
+                                <small class="text-muted">
+                                    {% if forloop.first %}
+                                    <span class="badge bg-success">Starter</span>
+                                    {% else %}
+                                    Member
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-10">
+                        <div class="post-header d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                            <div class="post-info">
+                                <span class="badge bg-primary rounded-pill me-2">#{{ forloop.counter }}</span>
+                                <small class="text-muted"><i class="fas fa-clock me-1"></i>{{ post.created_dt|date:"M d, Y H:i" }}</small>
+                            </div>
+                        </div>
+
+                        <div class="post-message card bg-light border-0 p-4">
+                            <div class="message-content">
+                                {{ post.message|linebreaks }}
+                            </div>
+                        </div>
+
+                        {% if forloop.first %}
+                        <div class="post-footer mt-3 pt-3 border-top">
+                            <div class="topic-starter-badge">
+                                <span class="badge bg-success"><i class="fas fa-crown me-1"></i>Topic Starter</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .text-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .btn-glow {
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        border-radius: 8px;
+        padding: 12px 30px;
+        font-weight: 600;
+        border: none;
+    }
+
+    .btn-glow:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+        background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+    }
+
+    .btn-outline-secondary {
+        border-radius: 8px;
+        padding: 12px 25px;
+        font-weight: 500;
+        border: 2px solid #6c757d;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #6c757d;
+        color: white;
+        transform: translateY(-2px);
+        border-color: #6c757d;
+    }
+
+    .card {
+        border-radius: 15px;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+    .post-container {
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+        border-left: 4px solid #667eea;
+    }
+
+    .post-container:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .user-avatar {
+        width: 70px;
+        height: 70px;
+        border: 3px solid #667eea;
+        padding: 3px;
+        transition: all 0.3s ease;
+    }
+
+    .user-avatar:hover {
+        transform: scale(1.05);
+        border-color: #764ba2;
+    }
+
+    .user-avatar-section {
+        padding: 15px;
+        background: linear-gradient(135deg, #f8f9ff 0%, #e9ecef 100%);
+        border-radius: 12px;
+    }
+
+    .post-message {
+        border-radius: 10px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%) !important;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        min-height: 100px;
+    }
+
+    .message-content {
+        font-size: 1.05rem;
+        line-height: 1.6;
+        color: #2c3e50;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.5em 0.8em;
+        font-weight: 500;
+    }
+
+    .topic-info .info-item {
+        padding: 8px 0;
+        border-bottom: 1px solid #f1f3f4;
+    }
+
+    .topic-info .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        border: 2px solid #e9ecef;
+        padding: 12px 15px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background: #ffffff;
+    }
+
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        transform: translateY(-1px);
+    }
+
+    label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 8px;
+        font-size: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .btn-glow, .btn-outline-secondary {
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+        }
+
+        .d-flex {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .btn {
+            width: 100%;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}

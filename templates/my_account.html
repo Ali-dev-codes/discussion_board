@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}My account {% endblock %}
+
+
+
+{% block breadcrumb%}
+    <style>
+        /* خطوط أفقية فقط */
+        .table tbody tr td {
+            border-top: 1px solid rgba(0,0,0,0.2); /* خط أفقي خفيف */
+        }
+        /* نشيل الخطوط العمودية */
+        .table th, .table td {
+            border-left: none !important;
+            border-right: none !important;
+        }
+        /* نخفي آخر خط */
+        .table tbody tr:last-child td {
+            border-bottom: none !important;
+        }
+        /* خلفية breadcrumb */
+        .breadcrumb {
+            background-color: #b0b0b0; /* رمادي فاتح */
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+
+            <li class="breadcrumb-item active" aria-current="page">My account</li>
+    {% endblock %}
+
+
+
+
+{% block content%}
+
+<div class="new-topic-form">
+    
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {% include 'includes/form.html'%}
+
+     <br> <button type="submit" class="btn-primary">Save Changes</button>
+    </form>
+
+</div>
+
+
+
+{% endblock %}
