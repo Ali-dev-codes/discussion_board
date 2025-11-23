@@ -18,13 +18,24 @@ import dj_database_url  # مهم لقراءة DATABASE_URL من Render
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', 'unsafe-secret-key')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'unsafe-secret-key-12345-change-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
-# السماح بالمضيفين من Environment
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')  # eg: "myapp.onrender.com"
+# إعدادات ALLOWED_HOSTS المعدلة
+ALLOWED_HOSTS = [
+    'discussion-board-4led.onrender.com',
+    'localhost',
+    '127.0.0.1',
+    '0.0.0.0',
+    '.onrender.com'
+]
+
+# احتياطي: إذا بدك تستخدم Environment variable
+allowed_hosts_env = os.environ.get('ALLOWED_HOSTS', '')
+if allowed_hosts_env:
+    ALLOWED_HOSTS = allowed_hosts_env.split(',')
 
 # Application definition
 INSTALLED_APPS = [
@@ -40,8 +51,10 @@ INSTALLED_APPS = [
     'import_export',
 ]
 
+# Middleware مع إضافة WhiteNoise
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # تم الإضافة - مهم جداً
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -67,13 +80,6 @@ TEMPLATES = [
     },
 ]
 
-
-
-
-
-
-
-
 WSGI_APPLICATION = 'dicussion_board.wsgi.application'
 
 # Database
@@ -83,7 +89,6 @@ DATABASES = {
         default=os.environ.get('DATABASE_URL'),  # يقرأ من Environment Variable
         conn_max_age=600
     )
-
 }
 
 # Password validation
@@ -115,10 +120,48 @@ STATICFILES_DIRS = [
     BASE_DIR/'static',
 ]
 
+# إعدادات WhiteNoise لتحسين أداء Static Files
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# إعدادات إضافية لـ WhiteNoise (اختيارية لكن مفيدة)
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_MANIFEST_STRICT = False
+WHITENOISE_ALLOW_ALL_ORIGINS = True
+
 # Login / Logout redirects
 LOGOUT_REDIRECT_URL = 'home'
 LOGIN_REDIRECT_URL = 'home'
-LOGIN_URL= 'login'
+LOGIN_URL = 'login'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# إعدادات Logging للتشخيص
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
+
+# إعدادات أمان إضافية لل production
+if not DEBUG:
+    # تأكد من استخدام HTTPS في production
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
