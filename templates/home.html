@@ -2,67 +2,210 @@
 
 {% block title %} Boards {% endblock %}
 
-
-
 {% block breadcrumb%}
     <style>
-        /* خطوط أفقية فقط */
-        .table tbody tr td {
-            border-top: 1px solid rgba(0,0,0,0.2); /* خط أفقي خفيف */
+        /* تحسينات عامة للصفحة */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
         }
-        /* نشيل الخطوط العمودية */
-        .table th, .table td {
-            border-left: none !important;
-            border-right: none !important;
-        }
-        /* نخفي آخر خط */
-        .table tbody tr:last-child td {
-            border-bottom: none !important;
-        }
-        /* خلفية breadcrumb */
+
         .breadcrumb {
-            background-color: #b0b0b0; /* رمادي فاتح */
-            padding: 10px;
-            border-radius: 5px;
+            background-color: #e9ecef;
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 24px;
+        }
+
+        .breadcrumb-item.active {
+            color: #495057;
+            font-weight: 500;
+        }
+
+        /* تصميم الجدول */
+        .table-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            background-color: #343a40;
+            color: white;
+            border: none;
+            padding: 16px 12px;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .table tbody tr td {
+            padding: 16px 12px;
+            vertical-align: middle;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* تصميم روابط المنتديات */
+        .board-link {
+            color: #0d6efd;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: color 0.2s;
+        }
+
+        .board-link:hover {
+            color: #0a58ca;
+            text-decoration: underline;
+        }
+
+        .board-description {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+
+        /* تصميم الأرقام والإحصائيات */
+        .stats-cell {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        /* تصميم آخر مشاركة */
+        .last-post {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .last-post small {
+            color: #adb5bd;
+            font-style: italic;
+        }
+
+        /* تصميم رأس الصفحة */
+        .page-header {
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            color: #343a40;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+
+        /* تصميم للأجهزة المحمولة */
+        @media (max-width: 768px) {
+            .table thead {
+                display: none;
+            }
+
+            .table, .table tbody, .table tr, .table td {
+                display: block;
+                width: 100%;
+            }
+
+            .table tr {
+                margin-bottom: 15px;
+                border: 1px solid #e9ecef;
+                border-radius: 8px;
+                padding: 10px;
+            }
+
+            .table td {
+                text-align: right;
+                padding-left: 50%;
+                position: relative;
+                border: none;
+            }
+
+            .table td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 12px;
+                width: calc(50% - 20px);
+                padding-right: 10px;
+                font-weight: 600;
+                text-align: left;
+                color: #495057;
+            }
+
+            .table td:first-child {
+                text-align: left;
+                padding-left: 12px;
+            }
+
+            .table td:first-child::before {
+                display: none;
+            }
         }
     </style>
 
-            <li class="breadcrumb-item active" aria-current="page">Boards</li>
-    {% endblock %}
 
-
-
+{% endblock %}
 
 {% block content%}
-    <table class="table table-sm table-borderless">
-        <thead class="table-dark">
-        <tr>
-            <th>Board</th>
-            <th>Posts</th>
-            <th>Topic</th>
-            <th>Last Post</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for board in boards %}
-        <tr>
-            <td><a href="{% url 'board_topics' board.pk%}">{{ board.name }}</a><br>
-                <small class="text-muted">{{ board.description }}</small>
-            </td>
-            <td>{{board.get_posts_count}}</td>
-            <td>{{board.topics.count}}</td>
-            <td>
-                {% with post=board.get_last_post%}
-                    {%if post%}
-                        by {{post.created_by.username}} at {{post.created_dt}}
-                    {%else%}
-                        <small>No Posts</small>
-                    {%endif%}
+    <div class="page-header">
+        <h1 class="page-title">Discussion Forums</h1>
+        <p class="page-subtitle">Choose a forum to start the discussion</p>
+    </div>
 
-                {%endwith%}
-            </td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    <div class="table-container">
+        <table class="table table-sm table-borderless">
+            <thead class="table-dark">
+            <tr>
+                <th>Board</th>
+                <th>Posts</th>
+                <th>Topic</th>
+                <th>Last Post</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for board in boards %}
+            <tr>
+                <td data-label="Board">
+                    <a href="{% url 'board_topics' board.pk%}" class="board-link">{{ board.name }}</a>
+                    <div class="board-description">{{ board.description }}</div>
+                </td>
+                <td data-label="Posts" class="stats-cell">{{board.get_posts_count}}</td>
+                <td data-label="Topic" class="stats-cell">{{board.topics.count}}</td>
+                <td data-label="Last Post" class="last-post">
+                    {% with post=board.get_last_post%}
+                        {%if post%}
+                            by {{post.created_by.username}} at {{post.created_dt}}
+                        {%else%}
+                            <small>No Posts</small>
+                        {%endif%}
+                    {%endwith%}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}
